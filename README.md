@@ -9,13 +9,12 @@ Make payments using weaccept.co API and Python.
 <code> auth = WeAcceptAuth('YOUR_API_KEY') </code>
 
 ### start auth process
-<code> auth.start() </code>
-returns 'success'
+<code> auth.start() # 'success' </code> 
 ### create your order
 <code> order = WeAcceptOrder(auth, {}, 'SPECIFY_A_MERCHANT_ORDER_ID', 200)</code>
 
 ### Order it
-<code> order.order()</code>
+<code> order.order() # 'success' </code>
 
 ### Now the order will get an order.id,
 #  DONT TRY TO CREATE THE SAME ORDER TWICE.
@@ -39,7 +38,7 @@ returns 'success'
 &nbsp;   }, 13102, 200)</pre></code>
 
 ### start payment
-<code> payment.start()</code>
+<code> payment.start() # 'success' </code>
 
 <code> print(payment.token) # prints the token</code>
 
