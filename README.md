@@ -7,6 +7,7 @@ Make payments using weaccept.co API and Python.
 
 ### specify auth data
 <code> auth = WeAcceptAuth('YOUR_API_KEY') </code>
+
 <small> NEVER STORE YOUR API_KEY IN YOUR .py FILES, STORE IT IN AN ENVIRONMENT VARIABLE OR .env FILE AND USE python-dotenv </small>
 
 ### start auth process
