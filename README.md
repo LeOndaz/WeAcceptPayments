@@ -59,14 +59,15 @@ API Reference:
                  currency='EGP',
                  shipping_data=None,
                  delivery_needed=False)</pre></code></li>
-        <li><code><pre>WeAcceptPayment(self,
-                 we_accept_auth_object,
-                 order_data,
-                 merchant_order_id,
+        <li><code><pre>WeAcceptPayment(self, we_accept_auth_obj,
+                 we_accept_order_obj,
+                 payment_data,
+                 billing_data,
+                 integration_id,
                  amount_cents,
                  currency='EGP',
-                 shipping_data=None,
-                 delivery_needed=False)</pre></code></li>
+                 lock_order_when_paid=False
+                 ):</pre></code></li>
                  
 </ul>
 
