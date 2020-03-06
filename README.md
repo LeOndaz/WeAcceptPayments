@@ -59,7 +59,8 @@ API Reference:
                  currency='EGP',
                  shipping_data=None,
                  delivery_needed=False)</pre></code></li>
-        <li><code><pre>WeAcceptPayment(self, we_accept_auth_obj,
+        <li><code><pre>WeAcceptPayment(self, 
+                 we_accept_auth_obj,
                  we_accept_order_obj,
                  payment_data,
                  billing_data,
