@@ -10,7 +10,7 @@ Make payments using weaccept.co API and Python.
 
 ### start auth process
 <code> auth.start() </code>
-
+returns 'success'
 ### create your order
 <code> order = WeAcceptOrder(auth, {}, 'SPECIFY_A_MERCHANT_ORDER_ID', 200)</code>
 
