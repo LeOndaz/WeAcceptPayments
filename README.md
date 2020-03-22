@@ -72,7 +72,7 @@ API Reference:
                  
 </ul>
 
-#### In each of those objects, You have access to .requrest, .response, .headers, other things too (Explore or use intellicode)
+#### In each of those objects, You have access to .request, .response, .headers, other things too (Explore or use intellicode)
 #### In each of those objects, You can access the response as obj[key] BUT after you call .start() otherwise, Exceptions are raised.
 
 Feel free to explore.
