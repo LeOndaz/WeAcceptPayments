@@ -1,7 +1,6 @@
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
-/weacceptpayments/how_to_use.py
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
