@@ -11,7 +11,11 @@ setuptools.setup(
     description="Make payments using weaccept.co API and Python.",
     long_description=long_description,
     long_description_content_type="text/markdown",
+<<<<<<< HEAD
     url="https://github.com/LeOndaz/WeAcceptPayments",
+=======
+    url="https://github.com/pypa/sampleproject",
+>>>>>>> 1200fc5c14c984607ffe59a7ec26984b0ed90581
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

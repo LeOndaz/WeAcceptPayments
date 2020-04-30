@@ -1,6 +1,10 @@
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
+<<<<<<< HEAD
+=======
+/weacceptpayments/testing.py
+>>>>>>> 1200fc5c14c984607ffe59a7ec26984b0ed90581
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -11,11 +15,15 @@ __pycache__/
 .vscode/
 /.vscode
 *.so
+<<<<<<< HEAD
 /weacceptpayments/ignorable.py
 /weacceptpayments.egg-info/*
 /dist/*
 /venv
 
+=======
+venv/
+>>>>>>> 1200fc5c14c984607ffe59a7ec26984b0ed90581
 # Distribution / packaging
 .Python
 build/
@@ -112,5 +120,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+<<<<<<< HEAD
 # End of https://www.gitignore.io/api/python
 weacceptpayments/ignorable.py
+=======
+# End of https://www.gitignore.io/api/python
+>>>>>>> 1200fc5c14c984607ffe59a7ec26984b0ed90581
