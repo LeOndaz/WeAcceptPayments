@@ -49,23 +49,48 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
         'items', 'shipping_data', 'auth', 'auth_token', 'merchant_id'
     ]
 
-    _MANDATORY_IN_ORDER_DATA = [
-        'merchant_id', 'merchant_order_id',
-    ]  # @TODO 'items' should be mandatory.
+    _MANDATORY_KWARGS = [
+        # amount cents must be specified and the server says duplicate order if it's not.
+        'merchant_order_id', 'merchant_id', 'amount_cents'
+    ]
 
-    _MANDATORY_IN_ITEM_DATA = [
+    _MANDATORY_ITEM_DATA = [
         'name', 'amount_cents'
     ]  # @TODO
 
-    _MANDATORY_KWARGS = [
-        *_MANDATORY_IN_ORDER_DATA[1:]
-    ]
+    def __init__(self, **kwargs):
+        auth = kwargs.pop('auth', None)
+
+        if not auth:
+            if 'auth_token' not in kwargs:
+                raise OrderError('Missing auth_token in keyword arguments')
+            if 'merchant_id' not in kwargs:
+                raise OrderError('Missing merchant_id in keyword arguments')
+        else:
+            kwargs['auth_token'] = auth.auth_token
+            kwargs['merchant_id'] = auth.merchant_id
+
+        # if 'delivery_needed' in kwargs and kwargs['delivery_needed'] == True:
+
+        kwargs.setdefault('currency', 'EGP')
+        kwargs.setdefault('delivery_needed', False)
+
+        if kwargs['delivery_needed']:
+            if 'shipping_data' not in kwargs:
+                raise OrderError('Delivery needed but no shipping_data specified.')
+
+        self.kwargs = kwargs
+        super().__init__(**kwargs)
 
     def _validate_items(self):
         """
         Should make sure that each item in items has a name & a price.
         Otherwise, We get a server error. This is important as the server
         doesn't respond well to this.
+
+        Duo to the way their JSON API is implemented, We can create an empty order and thus
+        This method only validates items if they are provided, Otherwise it returns nothing.
+
         """
         items = self.kwargs.get('items', None)
 
@@ -76,56 +101,27 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
             raise ItemFormatError('Empty items list.')
 
         for item in items:
-            if len(item.keys()) == len(self.get_mandatory_in_item_data()):
-                for key in self.get_mandatory_in_item_data():
+            if len(item.keys()) == len(self.get_mandatory_item_data()):
+                for key in self.get_mandatory_item_data():
                     if key not in item:
                         raise ItemFormatError(f'Missing {key} from {item}')
             else:
                 raise ItemFormatError('Items should only have name and amount_cents')
 
-    def _validate_order(self):
-        """
-        Should make sure that the must-include data are included.
-        """
-        for key in self.get_mandatory_in_order_data():
-            if key not in self.kwargs:
-                raise OrderError(f'Missing {key} in order_data')
-
-    def get_mandatory_in_item_data(self):
+    def get_mandatory_item_data(self):
         """
         'name', 'amount_cents' are mandatory. Server error if they are not included.
-        """
-        return self._MANDATORY_IN_ITEM_DATA
 
-    def get_mandatory_in_order_data(self):
+        Must return a list.
         """
-        'merchant_id', 'merchant_order_id' are mandatory.
-        May not be called if self._validate_order() is overridden.
-        """
-        return self._MANDATORY_IN_ORDER_DATA
+        return self._MANDATORY_ITEM_DATA
 
     def start(self):
 
-        auth = self.kwargs.pop('auth', None)
-
-        if auth is None:
-            if self.kwargs.get('auth_token', None) is None:
-                raise OrderError('Unspecified auth_token in order.')
-
-            if self.kwargs.get('merchant_id', None) is None:
-                raise OrderError('Unspecified merchant_id in order.')
-
-        self.kwargs.setdefault('currency', 'EGP')
-        self.kwargs.setdefault('delivery_needed', False)
-
-        self._validate_order()
         self._validate_items()
 
         try:
-            self.request = self.http_pool.request('POST',
-                                                  f'{URLS.ORDERS_URL}?token={self.kwargs.get("auth_token", None) or auth.auth_token}',
-                                                  body=json.dumps(self.kwargs),
-                                                  headers=self.get_headers())
+            self.request = self.post_request_kwargs(URLS.ORDERS_URL)
         except ConnectionError as e:
             return logging.error(f'Connection error, {e}')
 
@@ -137,38 +133,43 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
 
 
 class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
+    """
+    Create a payment for WeAccept.co
+
+    """
+
     _allowed_kwargs = [
         'amount_cents', 'expiration', 'billing_data', 'currency', 'integration_id',
         'lock_order_when_paid', 'auth', 'auth_token', 'order', 'order_id'
     ]
 
-    _MANDATORY_IN_PAYMENT_DATA = [
-        'order_id', 'currency', 'integration_id', 'billing_data', 'amount_cents',
+    _MANDATORY_KWARGS = [
+        'integration_id', 'billing_data', 'amount_cents'
     ]
 
-    _MANDATORY_KWARGS = [
-        *_MANDATORY_IN_PAYMENT_DATA[2:]
-    ]
+    def __init__(self, **kwargs):
+        auth = kwargs.pop('auth', None)
+        order = kwargs.pop('order', None)
+
+        if not auth:
+            if 'auth_token' not in kwargs:
+                raise PaymentError('Missing auth_token in keyword arguments')
+        else:
+            kwargs['auth_token'] = auth.auth_token
+
+        if not order:
+            if 'order_id' not in kwargs:
+                raise PaymentError('Missing order_id in keyword arguments')
+        else:
+            kwargs['order_id'] = order.order_id
+
+        kwargs.setdefault('currency', 'EGP')
+        kwargs.setdefault('lock_order_when_paid', False)
+
+        self.kwargs = kwargs
+        super().__init__(**kwargs)
 
     def start(self):
-
-        auth = self.kwargs.pop('auth', None)
-        order = self.kwargs.pop('order', None)
-
-        if auth is None:
-            if self.kwargs.get('auth_token', None) is not None:
-                pass
-            else:
-                raise PaymentError('Unspecified auth_token in order.')
-
-        if order is None:
-            if self.kwargs.get('order_id', None) is not None:
-                pass
-            else:
-                raise PaymentError('order_id is not included.')
-
-        self.kwargs.setdefault('currency', 'EGP')
-        self.kwargs.setdefault('lock_order_when_paid', False)
 
         self._validate_payment_data()
 
@@ -184,10 +185,11 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
         else:
             raise PaymentError(self.response)
 
-    def get_mandatory_in_payment_data(self):
-        return self._MANDATORY_IN_PAYMENT_DATA
-
     def _validate_payment_data(self):
-        for item in self.get_mandatory_in_payment_data():
+        """
+        Loop through all the mandatory data needed by the server to see if they are provided in the kwargs.
+        If they are not, Raise a PaymentError.
+        """
+        for item in self._MANDATORY_KWARGS:
             if item not in self.kwargs:
                 raise PaymentError(f'Missing {item} in payment_data')
