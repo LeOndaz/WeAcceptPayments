@@ -1,11 +1,12 @@
 import urllib3
-import inspect
 from weacceptpayments.decorators import classonlymethod
+import logging
 
 
 class NetworkingClassMixin:
     response = None
     request = None
+    auth_token = None
 
     http_pool = urllib3.PoolManager()
 
@@ -23,13 +24,16 @@ class NetworkingClassMixin:
         """
 
         if self.response:
-            return self.response.get(item, {'Error': 'Trying to access a non-existant key.'})
+            return self.response.get(item, {'Error': 'Trying to access a non-existent key.'})
 
     def __str__(self):
         return f'{self.response}'
 
 
 class BaseSignatureMixin:
+    _MANDATORY_KWARGS = None
+    _allowed_kwargs = None
+
     def __init__(self, **kwargs):
         """
         Make all kwarg keys as attributes with value same as the kwarg value
@@ -43,9 +47,9 @@ class BaseSignatureMixin:
         """
         Creates the instance based on kwargs, If someone tried to pass an existing method name as a parameter, Raise an explosion.
         """
-        for key in cls._MUST_INCLUDE_KWARGS:
+        for key in cls._MANDATORY_KWARGS:
             if key not in kwargs:
-                raise AttributeError(f'You must include f{self._MUST_INCLUDE_KWARGS}')
+                raise AttributeError(f'You must include f{cls._MANDATORY_KWARGS}')
 
         for k, v in kwargs.items():
             if k not in cls._allowed_kwargs:
@@ -58,12 +62,15 @@ class BaseSignatureMixin:
         return instance
 
     def start(self):
-        return {
-            "Error": "You've not implemented the start method"
-        }
+        raise NotImplementedError("You've not implemented the start method")
 
+    def __getattribute__(self, item):
+        """
+        Trying to access a None attribute raises AttributeError
+        mainly created for trying to access request, response before calling as_instance()
+        """
+        if object.__getattribute__(self, item) is None:
+            raise AttributeError(f"{self.__class__.__name__} is not meant to be instantiated.")
 
-class WeAcceptSharedDataMixin:
-    auth_token = None
-
+        return object.__getattribute__(self, item)
 
