@@ -1,4 +1,4 @@
-import urllib3
+import requests
 from weacceptpayments.decorators import classonlymethod
 import logging
 import json
@@ -8,8 +8,6 @@ class NetworkingClassMixin:
     response = None
     request = None
     auth_token = None
-
-    http_pool = urllib3.PoolManager()
 
     def get_headers(self):
         """
@@ -32,27 +30,21 @@ class NetworkingClassMixin:
         """
         The representation of the inheriting classes should be their response.
         """
-        return f'{self.response}'
+        return self.request.text
 
-    def post_request_kwargs(self, url, token=None, body=None):
+    def post_request_kwargs(self, url, body=None):
         """
-        This is mainly created to override this behavior if you want to use requests library or whatever if you want better
-        flexibility when dealing with the request or the response.
-
+        Auto post self.kwargs
         """
-
-        if token is None:
-            token = self.kwargs["auth_token"]
 
         if body is None:
-            body = json.dumps(self.kwargs)
+            body = self.kwargs.copy()
 
-        request = self.http_pool.request('POST',
-                                         f'{url}?token={token}',
-                                         body=body,
-                                         headers=self.get_headers())
-
-        return request
+        try:
+            self.request = requests.post(url, json=body, headers=self.get_headers())
+            self.response = self.request.json()
+        except requests.ConnectionError as e:
+            raise self.exception_class(e)
 
 
 class BaseSignatureMixin:
@@ -62,6 +54,7 @@ class BaseSignatureMixin:
     """
     _MANDATORY_KWARGS = None
     _allowed_kwargs = None
+    exception_class = None
 
     def __init__(self, **kwargs):
         """

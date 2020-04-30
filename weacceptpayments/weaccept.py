@@ -5,11 +5,11 @@ from .exceptions import AuthError, OrderError, PaymentError, ItemFormatError
 from .misc import HTTP_CODES
 from .consts import URLS
 from .mixins import NetworkingClassMixin, BaseSignatureMixin
-import json
-import logging
 
 
 class WeAcceptAuth(BaseSignatureMixin, NetworkingClassMixin):
+    exception_class = AuthError
+
     _allowed_kwargs = [
         'api_key'
     ]
@@ -22,28 +22,19 @@ class WeAcceptAuth(BaseSignatureMixin, NetworkingClassMixin):
         """
         no need to validate api_key, mandatory kwargs are validated by the BaseSignatureMixin.
         """
-        api_key = self.kwargs['api_key']
 
-        try:
-            self.request = self.http_pool.request('POST',
-                                                  URLS.AUTH_URL,
-                                                  body=json.dumps({
-                                                      'api_key': api_key
-                                                  }),
-                                                  headers=self.get_headers())
-        except ConnectionError as e:  # @todo
-            raise AuthError(e)
+        self.post_request_kwargs(URLS.AUTH_URL)
 
-        self.response = json.loads(self.request.data)
-
-        if self.request.status == HTTP_CODES.CREATED:
+        if self.request.status_code == HTTP_CODES.CREATED:
             self.auth_token = self.response['token']
             setattr(self, 'merchant_id', self.response['profile']['id'])
         else:
-            raise AuthError(self.response)
+            raise self.exception_class(self.response)
 
 
 class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
+    exception_class = OrderError
+
     _allowed_kwargs = [
         'delivery_needed', 'merchant_id', 'amount_cents', 'currency', 'merchant_order_id',
         'items', 'shipping_data', 'auth', 'auth_token', 'merchant_id'
@@ -63,9 +54,9 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
 
         if not auth:
             if 'auth_token' not in kwargs:
-                raise OrderError('Missing auth_token in keyword arguments')
+                raise self.exception_class('Missing auth_token in keyword arguments')
             if 'merchant_id' not in kwargs:
-                raise OrderError('Missing merchant_id in keyword arguments')
+                raise self.exception_class('Missing merchant_id in keyword arguments')
         else:
             kwargs['auth_token'] = auth.auth_token
             kwargs['merchant_id'] = auth.merchant_id
@@ -77,7 +68,7 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
 
         if kwargs['delivery_needed']:
             if 'shipping_data' not in kwargs:
-                raise OrderError('Delivery needed but no shipping_data specified.')
+                raise self.exception_class('Delivery needed but no shipping_data specified.')
 
         self.kwargs = kwargs
         super().__init__(**kwargs)
@@ -120,16 +111,12 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
 
         self._validate_items()
 
-        try:
-            self.request = self.post_request_kwargs(URLS.ORDERS_URL)
-        except ConnectionError as e:
-            return logging.error(f'Connection error, {e}')
+        self.post_request_kwargs(URLS.ORDERS_URL)
 
-        self.response = json.loads(self.request.data)
-        if self.request.status == HTTP_CODES.CREATED:
+        if self.request.status_code == HTTP_CODES.CREATED:
             setattr(self, 'order_id', self.response['id'])
         else:
-            raise OrderError(self.response)
+            raise self.exception_class(self.response)
 
 
 class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
@@ -137,6 +124,7 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
     Create a payment for WeAccept.co
 
     """
+    exception_class = PaymentError
 
     _allowed_kwargs = [
         'amount_cents', 'expiration', 'billing_data', 'currency', 'integration_id',
@@ -153,13 +141,13 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
 
         if not auth:
             if 'auth_token' not in kwargs:
-                raise PaymentError('Missing auth_token in keyword arguments')
+                raise self.exception_class('Missing auth_token in keyword arguments')
         else:
             kwargs['auth_token'] = auth.auth_token
 
         if not order:
             if 'order_id' not in kwargs:
-                raise PaymentError('Missing order_id in keyword arguments')
+                raise self.exception_class('Missing order_id in keyword arguments')
         else:
             kwargs['order_id'] = order.order_id
 
@@ -173,17 +161,12 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
 
         self._validate_payment_data()
 
-        self.request = self.http_pool.request('POST',
-                                              f"{URLS.PAYMENT_KEY_URL}?token={self.kwargs['auth_token']}",
-                                              body=json.dumps(self.kwargs),
-                                              headers=self.get_headers())
-
-        self.response = json.loads(self.request.data)
+        self.post_request_kwargs(URLS.PAYMENT_KEY_URL)
 
         if 'token' in self.response:
             setattr(self, 'token', self.response['token'])
         else:
-            raise PaymentError(self.response)
+            raise self.exception_class(self.response)
 
     def _validate_payment_data(self):
         """
@@ -192,4 +175,4 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
         """
         for item in self._MANDATORY_KWARGS:
             if item not in self.kwargs:
-                raise PaymentError(f'Missing {item} in payment_data')
+                raise self.exception_class(f'Missing {item} in payment_data')

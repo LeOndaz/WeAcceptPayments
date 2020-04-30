@@ -91,4 +91,8 @@ Tada! This is magic btw.
 - <br>
 - __In each of those objects, You can access the response as obj[key] BUT after you call .start() otherwise, Exceptions are raised.__  
   
+ ### @TODO
+- Verification of `merchant_order_id` which is an alpha-numeric value.
+- Verification of `shipping data` if `delivery_needed` is specified as True.
+  
 Feel free to explore.  

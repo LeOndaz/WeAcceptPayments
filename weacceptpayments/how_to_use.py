@@ -1,11 +1,11 @@
 from weacceptpayments.weaccept import WeAcceptAuth, WeAcceptOrder, WeAcceptPayment
-from unittest import TestCase
 
-auth = WeAcceptAuth.as_instance(api_key="api_key")
+
+auth = WeAcceptAuth.as_instance(api_key="api_key_here")
 
 print(auth.auth_token)
 
-order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='41ybb04cvdf')
+order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='41ybvb04cvdf')
 
 print(order.order_id)
 
