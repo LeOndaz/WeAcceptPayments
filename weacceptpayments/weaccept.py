@@ -3,7 +3,7 @@ Payments for WeAccept.co
 """
 from .exceptions import AuthError, OrderError, PaymentError, ItemFormatError
 from .misc import HTTP_CODES
-from .consts import WeAcceptConsts
+from .consts import URLS
 from .mixins import NetworkingClassMixin, BaseSignatureMixin
 import json
 import logging
@@ -19,11 +19,14 @@ class WeAcceptAuth(BaseSignatureMixin, NetworkingClassMixin):
     ]
 
     def start(self):
+        """
+        no need to validate api_key, mandatory kwargs are validated by the BaseSignatureMixin.
+        """
         api_key = self.kwargs['api_key']
 
         try:
             self.request = self.http_pool.request('POST',
-                                                  WeAcceptConsts.AUTH_URL,
+                                                  URLS.AUTH_URL,
                                                   body=json.dumps({
                                                       'api_key': api_key
                                                   }),
@@ -64,7 +67,10 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
         Otherwise, We get a server error. This is important as the server
         doesn't respond well to this.
         """
-        items = self.kwargs['items']
+        items = self.kwargs.get('items', None)
+
+        if not items:
+            return
 
         if len(items) == 0:
             raise ItemFormatError('Empty items list.')
@@ -80,7 +86,6 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
     def _validate_order(self):
         """
         Should make sure that the must-include data are included.
-        :return:
         """
         for key in self.get_mandatory_in_order_data():
             if key not in self.kwargs:
@@ -95,6 +100,7 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
     def get_mandatory_in_order_data(self):
         """
         'merchant_id', 'merchant_order_id' are mandatory.
+        May not be called if self._validate_order() is overridden.
         """
         return self._MANDATORY_IN_ORDER_DATA
 
@@ -113,13 +119,11 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
         self.kwargs.setdefault('delivery_needed', False)
 
         self._validate_order()
-
-        if self.kwargs.get('items', None) is not None:
-            self._validate_items()
+        self._validate_items()
 
         try:
             self.request = self.http_pool.request('POST',
-                                                  f'{WeAcceptConsts.ORDERS_URL}?token={self.kwargs.get("auth_token", None) or auth.auth_token}',
+                                                  f'{URLS.ORDERS_URL}?token={self.kwargs.get("auth_token", None) or auth.auth_token}',
                                                   body=json.dumps(self.kwargs),
                                                   headers=self.get_headers())
         except ConnectionError as e:
@@ -166,12 +170,10 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
         self.kwargs.setdefault('currency', 'EGP')
         self.kwargs.setdefault('lock_order_when_paid', False)
 
-        for item in self._MANDATORY_IN_PAYMENT_DATA:
-            if item not in self.kwargs:
-                raise PaymentError(f'Missing {item} in payment_data')
+        self._validate_payment_data()
 
         self.request = self.http_pool.request('POST',
-                                              f"{WeAcceptConsts.PAYMENT_KEY_URL}?token={self.kwargs['auth_token']}",
+                                              f"{URLS.PAYMENT_KEY_URL}?token={self.kwargs['auth_token']}",
                                               body=json.dumps(self.kwargs),
                                               headers=self.get_headers())
 
@@ -181,3 +183,11 @@ class WeAcceptPayment(BaseSignatureMixin, NetworkingClassMixin):
             setattr(self, 'token', self.response['token'])
         else:
             raise PaymentError(self.response)
+
+    def get_mandatory_in_payment_data(self):
+        return self._MANDATORY_IN_PAYMENT_DATA
+
+    def _validate_payment_data(self):
+        for item in self.get_mandatory_in_payment_data():
+            if item not in self.kwargs:
+                raise PaymentError(f'Missing {item} in payment_data')

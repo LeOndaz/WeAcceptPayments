@@ -1,4 +1,4 @@
-class WeAcceptConsts:
+class URLS:
     MAIN_URL = 'https://accept.paymobsolutions.com/'
     AUTH_URL = f'{MAIN_URL}api/auth/tokens'
     ORDERS_URL = f'{MAIN_URL}api/ecommerce/orders'
