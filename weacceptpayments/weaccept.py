@@ -61,8 +61,6 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
             kwargs['auth_token'] = auth.auth_token
             kwargs['merchant_id'] = auth.merchant_id
 
-        # if 'delivery_needed' in kwargs and kwargs['delivery_needed'] == True:
-
         kwargs.setdefault('currency', 'EGP')
         kwargs.setdefault('delivery_needed', False)
 
@@ -109,7 +107,7 @@ class WeAcceptOrder(BaseSignatureMixin, NetworkingClassMixin):
 
     def start(self):
 
-        self._validate_items()
+        # self._validate_items()
 
         self.post_request_kwargs(URLS.ORDERS_URL)
 

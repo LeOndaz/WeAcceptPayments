@@ -1,11 +1,16 @@
 from weacceptpayments.weaccept import WeAcceptAuth, WeAcceptOrder, WeAcceptPayment
 
 
-auth = WeAcceptAuth.as_instance(api_key="api_key_here")
+auth = WeAcceptAuth.as_instance(api_key="ZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6VXhNaUo5LmV5SnVZVzFsSWpvaWFXNXBkR2xoYkNJc0luQnliMlpwYkdWZmNHc2lPamsxTWpRc0ltTnNZWE56SWpvaVRXVnlZMmhoYm5RaWZRLkhPQ0VyTlVPOWdickllUHJ3bnpFOVNCajJPZEppTDZCUnJMM2RRcWY5RWhPVTFscjN0emhvOXpveVk0V25Qa3I0c3J5b0Frc3hHMVcybXpiUHhfNllR")
 
 print(auth.auth_token)
 
-order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='41ybvb04cvdf')
+order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='ccasfdqw', items=[
+    {
+        "name": "taz1",
+        "amount_cents": 20000
+    }
+])
 
 print(order.order_id)
 

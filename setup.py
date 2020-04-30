@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="weacceptpayments", # Replace with your own username
-    version="2.1",
+    version="2.2",
     author="Ahmed I.Elsayed",
     author_email="ahmeddark369@gmail.com",
     description="Make payments using weaccept.co API and Python.",
