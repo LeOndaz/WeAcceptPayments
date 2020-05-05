@@ -25,10 +25,10 @@ order = WeAcceptOrder.as_instance(auth=auth,
 
 What kwargs are allowed? ``
 ```
-_allowed_kwargs = [  
+_allowed_kwargs = { 
     'delivery_needed', 'merchant_id', 'amount_cents', 'currency', 'merchant_order_id',  
     'items', 'shipping_data', 'auth', 'auth_token', 'merchant_id'  
-]
+}
 ```
 __PLEASE NOTE:__ 
 - Specifying `auth` (takes in a `WeAcceptAuth` object) is an alternative way of specifying `auth_token` and `merchant_id`, Don't specify both at the same time.
@@ -63,17 +63,17 @@ Now we have access to `.token`
 Again, What kwargs are allowed? 
 
 ```
-_allowed_kwargs = [  
+_allowed_kwargs = {  
     'amount_cents', 'expiration', 'billing_data', 'currency', 'integration_id',  
     'lock_order_when_paid', 'auth', 'auth_token', 'order', 'order_id'  
-]
+}
 ```
 - What kwargs are a mandatory? 
 ```
-_MANDATORY_KWARGS = [  
+_MANDATORY_KWARGS = {  
     # amount cents must be specified and the server says duplicate order if it's not.  
     'merchant_order_id', 'merchant_id', 'amount_cents'  
-]
+}
 ```
 
   __PLEASE NOTE:__ 
