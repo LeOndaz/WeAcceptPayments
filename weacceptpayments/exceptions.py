@@ -10,6 +10,6 @@ class PaymentError(Exception):
     """Raise for payment failure"""
 
 
-class ItemFormatError(Exception):
-    """Raise for invalid items format"""
+class FormatError(Exception):
+    """Raise for invalid formats"""
 
