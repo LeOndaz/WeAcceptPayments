@@ -1,11 +1,11 @@
 from weacceptpayments.weaccept import WeAcceptAuth, WeAcceptOrder, WeAcceptPayment
 
 # this is okay, I change the api_key after each commit.
-auth = WeAcceptAuth.as_instance(api_key="ZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKSVV6VXhNaUo5LmV5SnVZVzFsSWpvaWFXNXBkR2xoYkNJc0luQnliMlpwYkdWZmNHc2lPamsxTWpRc0ltTnNZWE56SWpvaVRXVnlZMmhoYm5RaWZRLkhPQ0VyTlVPOWdickllUHJ3bnpFOVNCajJPZEppTDZCUnJMM2RRcWY5RWhPVTFscjN0emhvOXpveVk0V25Qa3I0c3J5b0Frc3hHMVcybXpiUHhfNllR")
+auth = WeAcceptAuth.as_instance(api_key="ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SndjbTltYVd4bFgzQnJJam81TlRJMExDSnVZVzFsSWpvaU1UVTRPRGN4TVRVM015NHdOakkxT1RjaUxDSmpiR0Z6Y3lJNklrMWxjbU5vWVc1MEluMC5yVklBWjNhb3ZYdnVPcW9OVHN3S0VSeWdjOWFQellRV0NBSDNUYUhFbGpXM3BPdkhXblZmSUY3RUNNWjRmQVUzMnFfeUNBamhZWUw5UmpHVFk4NWI3dw====")
 
 print(auth.auth_token)
 
-order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='cfc_dqcw', items=[
+order = WeAcceptOrder.as_instance(auth=auth, merchant_id=auth.merchant_id, amount_cents=20000, merchant_order_id='h3hcc3466', items=[
     {
         "name": "taz1",
         "amount_cents": 20000

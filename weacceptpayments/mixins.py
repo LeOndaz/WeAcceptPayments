@@ -52,7 +52,7 @@ class BaseSignatureMixin:
     :param _MANDATORY_KWARGS: Those are the kwargs needed to create the object, Not necessarily the kwargs needed to request the server.
     :param _allowed_kwargs: Those are the kwargs allowed by the server.
     """
-    _MANDATORY_KWARGS = None
+    _mandatory_kwargs = None
     _allowed_kwargs = None
     exception_class = None
 
@@ -95,13 +95,13 @@ class BaseSignatureMixin:
 
         raise NotImplementedError("You've not implemented the start method")
 
-    @classonlymethod
+    @classmethod
     def get_mandatory_kwargs(cls):
         """
         To override mandatory kwargs.
         """
 
-        return cls._MANDATORY_KWARGS
+        return cls._mandatory_kwargs
 
     def __getattribute__(self, item):
         """
